@@ -25,6 +25,8 @@ cfgEvents.durRampUp   = [1.0 3.0]; % [min max] for the jitter
 cfgEvents.durFlatTop  = 2.0;
 cfgEvents.durRest     = 6.0;
 
+cfgEvents.durWindow   = 6.0; % 1 screen content is this duration
+
 
 %% Debugging
 
@@ -32,9 +34,16 @@ switch ACQmode
     case 'Acquisition'
         % pass
     case 'Debug'
-
+        cfgEvents.nTrialPerCondition = 2;
+        cfgEvents.durRampUp   = [1.0 3.0]; % [min max] for the jitter
+        cfgEvents.durFlatTop  = 2.0;
+        cfgEvents.durRest     = 6.0;
     case 'FastDebug'
-
+        cfgEvents.nTrialPerCondition = 2;
+        cfgEvents.durRampUp   = [1.0 2.0]; % [min max] for the jitter
+        cfgEvents.durFlatTop  = 1.0;
+        cfgEvents.durRest     = 1.0;
+        cfgEvents.durWindow   = 3.0;
     otherwise
         error('mode ?')
 end
@@ -63,6 +72,7 @@ for i = 1 : cfgEvents.nCondition
 end
 
 Trials = Shuffle(Trials,2);
+cfgEvents.Trials = Trials;
 
 
 %% Build planning
@@ -79,8 +89,10 @@ planning.AddStart();
 
 planning.AddStim('Rest', planning.GetNextOnset(), cfgEvents.durRampUp(end))
 for iTrial = 1 : cfgEvents.nTrial
-    planning.AddStim('Stim', planning.GetNextOnset(), Trials(iTrial,2) + cfgEvents.durFlatTop, {iTrial, cfgEvents.Condition{Trials(iTrial,1)}})
-    planning.AddStim('Rest', planning.GetNextOnset(), cfgEvents.durRest)
+    condname = cfgEvents.Condition{Trials(iTrial,1)};
+    planning.AddStim(['RampUp__'  condname], planning.GetNextOnset(), Trials(iTrial,2)    , {iTrial, condname})
+    planning.AddStim(['FlatTop__' condname], planning.GetNextOnset(), cfgEvents.durFlatTop, {iTrial, condname})
+    planning.AddStim('Rest'   , planning.GetNextOnset(), cfgEvents.durRest)
 end
 planning.AddStim('Rest', planning.GetNextOnset(), cfgEvents.durRampUp(end))
 
