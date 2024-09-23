@@ -108,20 +108,20 @@ end
 
 %% Task
 
-result = which(sprintf('TASK.%s.Run', S.guiTask));
+result = which('TASK.CERSTIM.Run');
 if isempty(result)
-    logger.err('No `Run.m` file found to start the task `%s`. Expected path = %s', S.guiTask, fullfile(S.ProjectRootDir,'+TASK',sprintf('+%s',S.guiTask),'Run.m'))
+    logger.err('TASK.CERSTIM.Run not found')
     return
 end
 
-logger.log('Calling TASK.%s.Run()', S.guiTask)
+logger.log('Calling TASK.CERSTIM.Run()')
 
 switch S.guiACQmode
 
     case 'Acquisition'
         % call the Run() in a try/catch
         try
-            TASK.(S.guiTask).Run();
+            TASK.CERSTIM.Run();
         catch exception
             % Abort at START ?
             if ~isempty(strfind(exception.message, 'Abort')) && ~isempty(strfind(exception.stack(1).name, 'START'))
@@ -137,7 +137,7 @@ switch S.guiACQmode
 
     case {'Debug', 'FastDebug'}
         % no try/catch, because it's easier for debugging
-        TASK.(S.guiTask).Run();
+        TASK.CERSTIM.Run();
 
 end
 
