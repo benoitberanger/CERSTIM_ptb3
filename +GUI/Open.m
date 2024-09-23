@@ -80,8 +80,9 @@ base_cfg_checkbox    = {'Units', 'Normalized', 'BackgroundColor',figureBGcolor, 
 %% Main pannels
 % To add a new "main" panel, its here.
 
-handles.uipanel_perma_cfg = uipanel(handles.(gui_name), base_cfg_panel{:}, 'Position',[0.00 0.50 1.00 0.50], 'Title','CFG' );
-handles.uipanel_task      = uipanel(handles.(gui_name), base_cfg_panel{:}, 'Position',[0.00 0.00 1.00 0.50], 'Title','TASK');
+handles.uipanel_perma_cfg = uipanel      (handles.(gui_name), base_cfg_panel{:}, 'Position',[0.00 0.50 1.00 0.50], 'Title','CFG'         );
+handles.uipanel_input     = uibuttongroup(handles.(gui_name), base_cfg_panel{:}, 'Position',[0.00 0.40 1.00 0.10], 'Title','Input Method');
+handles.uipanel_task      = uipanel      (handles.(gui_name), base_cfg_panel{:}, 'Position',[0.00 0.00 1.00 0.40], 'Title','TASK'        );
 
 
 %% Panel : permanent config
@@ -170,11 +171,18 @@ handles.pushbutton_eyelink_downloadfiles = uicontrol(where, base_cfg_pushbutton{
 handles.pushbutton_eyelink_forcereset    = uicontrol(where, base_cfg_pushbutton{:}, 'Position',[0.66 0.00 0.33 0.50], 'String','ForceReset   ', 'Callback', @GUI.VIEW.pushbutton_eyelink_forcereset_Callback   );
 
 
+%% Panel : Input method
+
+where = handles.uipanel_input;
+handles.radiobutton_mode_grip  = uicontrol(where, base_cfg_radiobutton{:}, 'Position',[0.25 0.30 0.30 0.50], 'String','HandGrip', 'Tooltip','Using LabJack USB');
+handles.radiobutton_mode_mouse = uicontrol(where, base_cfg_radiobutton{:}, 'Position',[0.55 0.30 0.30 0.50], 'String','Mouse'   , 'Tooltip','Computer mouse'   );
+
+
 %% Panel : Task
 
 where = handles.uipanel_task;
 
-tasklist = UTILS.GET.TaskList();
+tasklist = {'Training', 'Full'};
 
 nObjPerRow = 2;
 task_dispatcher = GUI.VIEW.ObjectDispatcher(ones(size(tasklist)), nObjPerRow);
