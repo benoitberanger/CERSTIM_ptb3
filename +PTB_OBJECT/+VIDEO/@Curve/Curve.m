@@ -9,10 +9,17 @@ classdef Curve < PTB_OBJECT.VIDEO.Base
 
     properties(GetAccess = public, SetAccess = protected)
         buffer            (1,:) double
-        offset            (1,1) uint64
+        offset            (1,1) uint64 = 0
         center_y_lower_px (1,1) double % lower bound of center Y
         center_y_upper_px (1,1) double % upper bound of center Y
         width_px          (1,1) double
+        px_per_second     (1,1) double
+        px_per_frame      (1,1) double
+        Rpx_per_frame     (1,1) double
+        n_frame           (1,1) double = 1
+        px_expected       (1,1) double = 0
+        px_total          (1,1) double = 0
+        px_error          (1,1) double = 0
     end % props
 
     methods(Access = public)
@@ -25,8 +32,10 @@ classdef Curve < PTB_OBJECT.VIDEO.Base
         %------------------------------------------------------------------
         function Init(self)
             self.buffer = nan(1,self.size);
-            self.offset = 0;
             self.width_px = self.width * self.window.size_y;
+            self.px_per_second = self.window.size_x / self.window_duration;
+            self.px_per_frame  = self.px_per_second / self.window.fps;
+            self.Rpx_per_frame = round(self.px_per_frame);
         end % fcn
 
         %------------------------------------------------------------------
@@ -59,9 +68,24 @@ classdef Curve < PTB_OBJECT.VIDEO.Base
 
         %------------------------------------------------------------------
         function Next(self)
-            px_per_second = self.window.size_x / self.window_duration;
-            px_per_frame  = px_per_second      / self.window.fps;
-            self.buffer   = circshift(self.buffer, [1 -round(px_per_frame)]);
+
+            if self.n_frame > 1
+                if self.px_error >= 1
+                    shift = self.Rpx_per_frame + 1;
+                else
+                    shift = self.Rpx_per_frame;
+                end
+            else
+                shift = self.Rpx_per_frame;
+            end
+
+            self.buffer   = circshift(self.buffer, [1 -shift]);
+
+            self.px_expected = self.n_frame * self.px_per_frame;
+            self.px_total    = self.px_total + shift;
+            self.px_error    = self.n_frame * self.px_per_frame - self.px_total;
+            self.n_frame     = self.n_frame +1;
+
         end % end
 
         %------------------------------------------------------------------
