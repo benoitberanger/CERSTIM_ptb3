@@ -87,14 +87,14 @@ planning.AddStart();
 
 % --- Stim ----------------------------------------------------------------
 
-planning.AddStim('Rest', planning.GetNextOnset(), cfgEvents.durRampUp(end))
+planning.    AddStim('Rest'                , planning.GetNextOnset(), cfgEvents.durRampUp(end))
 for iTrial = 1 : cfgEvents.nTrial
     condname = cfgEvents.Condition{Trials(iTrial,1)};
-    planning.AddStim(['RampUp__'  condname], planning.GetNextOnset(), Trials(iTrial,2)    , {iTrial, condname})
-    planning.AddStim(['FlatTop__' condname], planning.GetNextOnset(), cfgEvents.durFlatTop, {iTrial, condname})
-    planning.AddStim('Rest'   , planning.GetNextOnset(), cfgEvents.durRest)
+    planning.AddStim(['RampUp__'  condname], planning.GetNextOnset(), Trials(iTrial,2)        , {iTrial, condname})
+    planning.AddStim(['FlatTop__' condname], planning.GetNextOnset(), cfgEvents.durFlatTop    , {iTrial, condname})
+    planning.AddStim('Rest'                , planning.GetNextOnset(), cfgEvents.durRest       )
 end
-planning.AddStim('Rest', planning.GetNextOnset(), cfgEvents.durRampUp(end))
+planning.    AddStim('Rest'                , planning.GetNextOnset(), cfgEvents.durRampUp(end))
 
 % --- Stop ----------------------------------------------------------------
 
