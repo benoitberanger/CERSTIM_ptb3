@@ -122,7 +122,9 @@ Curve.SetRangeY(S.cfgCursor.YRange(2), S.cfgCursor.YRange(1));
 % initialize / pre-allocate some vars
 EXIT = false;
 time = GetSecs();
-icol_trial   = S.recPlanning.Get('trial');
+icol_trial    = S.recPlanning.Get('trial'    );
+icol_stim     = S.recPlanning.Get('stim'     );
+icol_cond     = S.recPlanning.Get('condition');
 curve_counter = 1;
 first_frame_of_event = true;
 
@@ -132,12 +134,16 @@ for evt = 1 : S.recPlanning.count
     evt_name     = S.recPlanning.data{evt,S.recPlanning.icol_name    };
     evt_onset    = S.recPlanning.data{evt,S.recPlanning.icol_onset   };
     evt_duration = S.recPlanning.data{evt,S.recPlanning.icol_duration};
+    evt_trial    = S.recPlanning.data{evt,icol_trial};
+    evt_stim     = S.recPlanning.data{evt,icol_stim };
+    evt_cond     = S.recPlanning.data{evt,icol_cond };
 
     if evt < S.recPlanning.count
         next_evt_onset = S.recPlanning.data{evt+1,S.recPlanning.icol_onset};
     end
 
-    fprintf('[%03d/%03d] %s : %gs \n', evt, S.recPlanning.count, evt_name, evt_duration);
+    fprintf('[%2d/%2d] %7s - %7s : %gs \n', ...
+        evt_trial, S.cfgEvents.nTrial, evt_stim, evt_cond, evt_duration);
 
     switch evt_name
 
@@ -147,20 +153,20 @@ for evt = 1 : S.recPlanning.count
             init_evt_idx = 1;
             for i = 1 : init_event_maxidx_to_fill
                 init_evt_idx = 1 + i; % +1 because START must be skipped
-                init_evt_name = S.recPlanning.data{init_evt_idx,S.recPlanning.icol_name};
+                init_evt_stim = S.recPlanning.data{init_evt_idx,icol_stim};
 
-                if init_evt_idx == 2 && ~strcmp(init_evt_name, 'Rest')
+                if init_evt_idx == 2 && ~strcmp(init_evt_stim, 'Rest')
                     error('second event must be Rest')
                 end
 
-                if init_evt_idx == 2 && strcmp(init_evt_name, 'Rest')
+                if init_evt_idx == 2 && strcmp(init_evt_stim, 'Rest')
                     Curve.Append(zeros(1,Cursor.center_x_px))
                     Curve.Append(rest_points);
-                elseif strcmp(init_evt_name, 'Rest')
+                elseif strcmp(init_evt_stim, 'Rest')
                     Curve.Append(rest_points);
-                elseif strfind(init_evt_name, 'FlatTop') %#ok<*STRIFCND>
+                elseif strcmp(init_evt_stim, 'FlatTop')
                     Curve.Append(flattop_points);
-                elseif strfind(init_evt_name, 'RampUp')
+                elseif strcmp(init_evt_stim, 'RampUp')
                     Curve.Append(curves{curve_counter});
                     curve_counter = curve_counter + 1;
                 else
@@ -185,12 +191,12 @@ for evt = 1 : S.recPlanning.count
 
             init_evt_idx = init_evt_idx + 1;
             if init_evt_idx < S.recPlanning.count
-                buffer_evt_name = S.recPlanning.data{init_evt_idx,S.recPlanning.icol_name};
-                if strcmp(buffer_evt_name, 'Rest')
+                buffer_evt_stim = S.recPlanning.data{init_evt_idx,icol_stim};
+                if     strcmp(buffer_evt_stim, 'Rest')
                     Curve.Append(rest_points);
-                elseif strfind(buffer_evt_name, 'FlatTop')
+                elseif strcmp(buffer_evt_stim, 'FlatTop')
                     Curve.Append(flattop_points);
-                elseif strfind(buffer_evt_name, 'RampUp')
+                elseif strcmp(buffer_evt_stim, 'RampUp')
                     Curve.Append(curves{curve_counter});
                     curve_counter = curve_counter + 1;
                 else
