@@ -1,4 +1,4 @@
-function STARTtime = START(keyStart,keyAbort)
+function STARTtime = START(keyStart,keyAbort, Cursor)
 global S
 
 switch S.guiACQmode
@@ -21,6 +21,9 @@ switch S.guiACQmode
         while 1
 
             [keyIsDown, STARTtime, keyCode] = KbCheck();
+
+            Cursor.Update();
+            Cursor.Draw();
 
             if ~keyIsDown
                 continue

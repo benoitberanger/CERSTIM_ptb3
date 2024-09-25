@@ -48,6 +48,12 @@ classdef RectCursor < PTB_OBJECT.VIDEO.Base
         end % fcn
 
         %------------------------------------------------------------------
+        function Update(self)
+            % to be filled....
+            self.UpdateY(0);
+        end % fcn
+
+        %------------------------------------------------------------------
         function UpdateY(self,y)
             % y from 0 to 1
             % y: [0-1] -> f(y): [center_y_lower_px center_y_upper_px]
@@ -58,7 +64,10 @@ classdef RectCursor < PTB_OBJECT.VIDEO.Base
         %------------------------------------------------------------------
         function Draw( self )
             % runtime
-            Screen('FillRect', self.window.ptr, self.color, self.rect);
+            c = self.color;
+            c(1:3) = c(1:3)/2;
+            Screen('FillRect', self.window.ptr,          c, InsetRect(self.rect,-2,-2));
+            Screen('FillRect', self.window.ptr, self.color,           self.rect       );
         end % fcn
 
     end % meths

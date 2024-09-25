@@ -81,7 +81,7 @@ classdef Curve < PTB_OBJECT.VIDEO.Base
 
             self.buffer   = circshift(self.buffer, -shift);
             self.offset   = self.offset - shift;
-            
+
             self.px_total    = self.px_total + shift;
             self.px_expected = self.n_frame * self.px_per_frame;
             self.px_error    = self.px_expected - self.px_total;

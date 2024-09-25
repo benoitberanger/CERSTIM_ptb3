@@ -32,11 +32,11 @@ S.recKeylogger.Start();
 
 %% set parameters for rendering objects
 
-S.cfgCursor.Size     = 0.01;              %  Size_px = ScreenY_px * Size
-S.cfgCursor.Width    = 0.20;              % Width_px =    Size_px * Width
-S.cfgCursor.Color    = [255 050 050 255]; % [R G B a], from 0 to 255
+S.cfgCursor.Size     = 0.03;              %  Size_px = ScreenY_px * Size
+S.cfgCursor.Width    = 0.30;              % Width_px =    Size_px * Width
+S.cfgCursor.Color    = [255 000 000 255]; % [R G B a], from 0 to 255
 S.cfgCursor.XCenter  = 0.25;              % Position_px = ScreenX_px * XCenter
-S.cfgCursor.YRange   = [0.25 0.75];       % Position_px = [ScreenY_px ScreenY_px] .* YRange
+S.cfgCursor.YRange   = [0.20 0.80];       % Position_px = [ScreenY_px ScreenY_px] .* YRange
 
 S.cfgCurve.Color     = [128 128 128 255]; % [R G B a], from 0 to 255
 S.cfgCurve.Width     = 0.005;              % Width_px =    Size_px * Width
@@ -64,7 +64,7 @@ S.Window.Open();
 %% Prepare buffer size
 
 event_name = S.recPlanning.data(:,S.recPlanning.Get('name'));
-is_RampUp = ~cellfun(@isempty, strfind(event_name, 'RampUp')); %#ok<STRCLFH> 
+is_RampUp = ~cellfun(@isempty, strfind(event_name, 'RampUp')); %#ok<STRCLFH>
 duration_RampUp = S.recPlanning.data(is_RampUp,S.recPlanning.Get('duration')); % cell
 max_dur_one_trial = max(cell2mat(duration_RampUp)) + S.cfgEvents.durFlatTop;
 n_window = 2;
@@ -167,10 +167,11 @@ for evt = 1 : S.recPlanning.count
             end
 
             Curve.Draw();
-
+            Cursor.Update();
             Cursor.Draw();
             Window.Flip();
-            S.STARTtime = PTB_ENGINE.START(S.cfgKeybinds.Start, S.cfgKeybinds.Abort);
+
+            S.STARTtime = PTB_ENGINE.START(S.cfgKeybinds.Start, S.cfgKeybinds.Abort, Cursor);
             S.recEvent.AddStart();
             S.Window.AddFrameToMovie();
 
@@ -215,6 +216,7 @@ for evt = 1 : S.recPlanning.count
                 Curve.Draw();
                 Curve.Next();
 
+                Cursor.Update();
                 Cursor.Draw();
                 flip_onset = Window.Flip();
 
