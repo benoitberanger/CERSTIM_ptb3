@@ -32,8 +32,8 @@ S.recKeylogger.Start();
 
 %% set parameters for rendering objects
 
-S.cfgCursor.Size     = 0.05;              %  Size_px = ScreenY_px * Size
-S.cfgCursor.Width    = 0.10;              % Width_px =    Size_px * Width
+S.cfgCursor.Size     = 0.01;              %  Size_px = ScreenY_px * Size
+S.cfgCursor.Width    = 0.20;              % Width_px =    Size_px * Width
 S.cfgCursor.Color    = [255 050 050 255]; % [R G B a], from 0 to 255
 S.cfgCursor.XCenter  = 0.25;              % Position_px = ScreenX_px * XCenter
 S.cfgCursor.YRange   = [0.25 0.75];       % Position_px = [ScreenY_px ScreenY_px] .* YRange
@@ -64,12 +64,15 @@ S.Window.Open();
 %% Prepare buffer size
 
 event_name = S.recPlanning.data(:,S.recPlanning.Get('name'));
-is_RampUp = ~cellfun(@isempty, strfind(event_name, 'RampUp'));
+is_RampUp = ~cellfun(@isempty, strfind(event_name, 'RampUp')); %#ok<STRCLFH> 
 duration_RampUp = S.recPlanning.data(is_RampUp,S.recPlanning.Get('duration')); % cell
 max_dur_one_trial = max(cell2mat(duration_RampUp)) + S.cfgEvents.durFlatTop;
-n_window = 3;
+n_window = 2;
 buffer_size_px = round(n_window * (max_dur_one_trial+S.cfgEvents.durRest) * S.Window.size_x);
 
+event_onset = cell2mat(S.recPlanning.data(:,S.recPlanning.Get('onset')));
+initial_duration_to_fill = (n_window - 1)*(max_dur_one_trial+S.cfgEvents.durRest);
+[~,init_event_maxidx_to_fill] = min(abs(event_onset - initial_duration_to_fill));
 
 
 %% Prepare curves
@@ -118,6 +121,8 @@ Curve.SetRangeY(S.cfgCursor.YRange(2), S.cfgCursor.YRange(1));
 EXIT = false;
 time = GetSecs();
 icol_trial   = S.recPlanning.Get('trial');
+curve_counter = 1;
+first_frame_of_event = true;
 
 % main loop
 for evt = 1 : S.recPlanning.count
@@ -130,21 +135,36 @@ for evt = 1 : S.recPlanning.count
         next_evt_onset = S.recPlanning.data{evt+1,S.recPlanning.icol_onset};
     end
 
+    fprintf('[%03d/%03d] %s : %gs \n', evt, S.recPlanning.count, evt_name, evt_duration);
+
     switch evt_name
 
         case 'START'
 
             % fill initial buffer
+            init_evt_idx = 1;
+            for i = 1 : init_event_maxidx_to_fill
+                init_evt_idx = 1 + i; % +1 because START must be skipped
+                init_evt_name = S.recPlanning.data{init_evt_idx,S.recPlanning.icol_name};
 
-            Curve.Append(zeros(1,S.Window.size_x));
+                if init_evt_idx == 2 && ~strcmp(init_evt_name, 'Rest')
+                    error('second event must be Rest')
+                end
 
-            Curve.Append(curves{1});
-            Curve.Append(flattop_points);
-            Curve.Append(rest_points);
-
-            Curve.Append(curves{2});
-            Curve.Append(flattop_points);
-            Curve.Append(rest_points);
+                if init_evt_idx == 2 && strcmp(init_evt_name, 'Rest')
+                    Curve.Append(zeros(1,Cursor.center_x_px))
+                    Curve.Append(rest_points);
+                elseif strcmp(init_evt_name, 'Rest')
+                    Curve.Append(rest_points);
+                elseif strfind(init_evt_name, 'FlatTop') %#ok<*STRIFCND>
+                    Curve.Append(flattop_points);
+                elseif strfind(init_evt_name, 'RampUp')
+                    Curve.Append(curves{curve_counter});
+                    curve_counter = curve_counter + 1;
+                else
+                    error('bad event')
+                end
+            end
 
             Curve.Draw();
 
@@ -163,6 +183,23 @@ for evt = 1 : S.recPlanning.count
 
         otherwise
 
+            first_frame_of_event = true;
+
+            init_evt_idx = init_evt_idx + 1;
+            if init_evt_idx < S.recPlanning.count
+                buffer_evt_name = S.recPlanning.data{init_evt_idx,S.recPlanning.icol_name};
+                if strcmp(buffer_evt_name, 'Rest')
+                    Curve.Append(rest_points);
+                elseif strfind(buffer_evt_name, 'FlatTop')
+                    Curve.Append(flattop_points);
+                elseif strfind(buffer_evt_name, 'RampUp')
+                    Curve.Append(curves{curve_counter});
+                    curve_counter = curve_counter + 1;
+                else
+                    error('bad event')
+                end
+            end
+
             while 1
 
                 [keyIsDown, time, keyCode] = KbCheck();
@@ -171,16 +208,26 @@ for evt = 1 : S.recPlanning.count
                     if EXIT, break, end
                 end
 
+                if ~strcmp(S.guiACQmode,'Acquisition')
+                    Screen('DrawText', S.Window.ptr, evt_name, 10, 10, Curve.color);
+                end
+
                 Curve.Draw();
                 Curve.Next();
 
                 Cursor.Draw();
-                Window.Flip();
+                flip_onset = Window.Flip();
 
-                fprintf('%s : %gs \n', evt_name, evt_duration);
+                if first_frame_of_event
+                    S.recEvent.AddStim(evt_name, flip_onset-S.STARTtime, [], S.recPlanning.data(evt,S.recPlanning.icol_data:end));
+                    first_frame_of_event = false;
+                end
+
+                if time >= S.STARTtime + next_evt_onset - S.Window.slack
+                    break
+                end
 
             end % while
-
 
     end % switch
 
@@ -228,7 +275,7 @@ assignin('base', 'S', S)
 switch S.guiACQmode
     case 'Acquisition'
     case {'Debug', 'FastDebug'}
-        UTILS.plotDelay(S.recPlanning, S.recEvent);
+        % UTILS.plotDelay(S.recPlanning, S.recEvent);
         % UTILS.plotStim(S.recPlanning, S.recEvent, S.recKeylogger);
 end
 

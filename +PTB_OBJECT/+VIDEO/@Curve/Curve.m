@@ -50,7 +50,7 @@ classdef Curve < PTB_OBJECT.VIDEO.Base
             from = self.offset + 1;
             to   = from - 1 + n;
             self.buffer(from:to) = new_points;
-            self.offset = self.offset + n;
+            self.offset          = self.offset + n;
         end % fcn
 
         %------------------------------------------------------------------
@@ -70,8 +70,8 @@ classdef Curve < PTB_OBJECT.VIDEO.Base
         function Next(self)
 
             if self.n_frame > 1
-                if self.px_error >= 1
-                    shift = self.Rpx_per_frame + 1;
+                if abs(self.px_error) >= 1
+                    shift = self.Rpx_per_frame + sign(self.px_error);
                 else
                     shift = self.Rpx_per_frame;
                 end
@@ -79,11 +79,12 @@ classdef Curve < PTB_OBJECT.VIDEO.Base
                 shift = self.Rpx_per_frame;
             end
 
-            self.buffer   = circshift(self.buffer, [1 -shift]);
-
-            self.px_expected = self.n_frame * self.px_per_frame;
+            self.buffer   = circshift(self.buffer, -shift);
+            self.offset   = self.offset - shift;
+            
             self.px_total    = self.px_total + shift;
-            self.px_error    = self.n_frame * self.px_per_frame - self.px_total;
+            self.px_expected = self.n_frame * self.px_per_frame;
+            self.px_error    = self.px_expected - self.px_total;
             self.n_frame     = self.n_frame +1;
 
         end % end

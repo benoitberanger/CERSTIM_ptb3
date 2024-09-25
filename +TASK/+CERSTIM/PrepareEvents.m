@@ -35,15 +35,10 @@ switch ACQmode
         % pass
     case 'Debug'
         cfgEvents.nTrialPerCondition = 2;
-        cfgEvents.durRampUp   = [1.0 3.0]; % [min max] for the jitter
-        cfgEvents.durFlatTop  = 2.0;
-        cfgEvents.durRest     = 6.0;
     case 'FastDebug'
         cfgEvents.nTrialPerCondition = 2;
         cfgEvents.durRampUp   = [1.0 2.0]; % [min max] for the jitter
-        cfgEvents.durFlatTop  = 1.0;
-        cfgEvents.durRest     = 1.0;
-        cfgEvents.durWindow   = 3.0;
+        cfgEvents.durRest     = 3.0;
     otherwise
         error('mode ?')
 end
@@ -87,14 +82,14 @@ planning.AddStart();
 
 % --- Stim ----------------------------------------------------------------
 
-planning.    AddStim('Rest'                , planning.GetNextOnset(), cfgEvents.durRampUp(end))
+planning.    AddStim('Rest'                , planning.GetNextOnset(), cfgEvents.durRest)
 for iTrial = 1 : cfgEvents.nTrial
     condname = cfgEvents.Condition{Trials(iTrial,1)};
     planning.AddStim(['RampUp__'  condname], planning.GetNextOnset(), Trials(iTrial,2)        , {iTrial, condname})
     planning.AddStim(['FlatTop__' condname], planning.GetNextOnset(), cfgEvents.durFlatTop    , {iTrial, condname})
     planning.AddStim('Rest'                , planning.GetNextOnset(), cfgEvents.durRest       )
 end
-planning.    AddStim('Rest'                , planning.GetNextOnset(), cfgEvents.durRampUp(end))
+planning.    AddStim('Rest'                , planning.GetNextOnset(), cfgEvents.durRest)
 
 % --- Stop ----------------------------------------------------------------
 
