@@ -1,4 +1,4 @@
-function STARTtime = START(keyStart,keyAbort, Cursor)
+function STARTtime = START(keyStart,keyAbort, Cursor, Curve)
 global S
 
 switch S.guiACQmode
@@ -23,7 +23,9 @@ switch S.guiACQmode
             [keyIsDown, STARTtime, keyCode] = KbCheck();
 
             Cursor.Update();
+            Curve.Draw();
             Cursor.Draw();
+            Cursor.Flip();
 
             if ~keyIsDown
                 continue

@@ -5,6 +5,7 @@ classdef RectCursor < PTB_OBJECT.VIDEO.Base
         dim      (1,1) double % ratio from window_size_x, from 0 to 1
         width    (1,1) double % ratio from self.dim, from 0 to 1
         color    (1,4) uint8  % [R G B a] from 0 to 255
+        input    (1,:) char   % 'HandGrip' or 'Mouse'
     end % props
 
 
@@ -48,9 +49,26 @@ classdef RectCursor < PTB_OBJECT.VIDEO.Base
         end % fcn
 
         %------------------------------------------------------------------
-        function Update(self)
-            % to be filled....
+        function Init(self)
+            switch self.input
+                case 'HandGrip'
+                case 'Mouse'
+                    SetMouse(self.center_x_px,self.center_y_lower_px,self.window.ptr);
+                otherwise
+                    error('input method ?')
+            end
             self.UpdateY(0);
+        end % fcn
+
+        %------------------------------------------------------------------
+        function Update(self)
+            switch self.input
+                case 'HandGrip'
+                case 'Mouse'
+                    [~,y] = GetMouse(self.window.ptr);
+                    pos = (y - self.center_y_lower_px) / (self.center_y_upper_px - self.center_y_lower_px);
+            end
+            self.UpdateY(pos);
         end % fcn
 
         %------------------------------------------------------------------

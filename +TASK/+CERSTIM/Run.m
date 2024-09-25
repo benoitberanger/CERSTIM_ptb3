@@ -103,7 +103,8 @@ Cursor.width  = S.cfgCursor.Width;
 Cursor.color  = S.cfgCursor.Color;
 Cursor.SetCenterX(S.cfgCursor.XCenter);
 Cursor.SetRangeY(S.cfgCursor.YRange(2), S.cfgCursor.YRange(1));
-Cursor.UpdateY(0);
+Cursor.input  = S.guiInputMethod;
+Cursor.Init();
 
 Curve                 = PTB_OBJECT.VIDEO.Curve();
 Curve.window          = Window;
@@ -166,12 +167,7 @@ for evt = 1 : S.recPlanning.count
                 end
             end
 
-            Curve.Draw();
-            Cursor.Update();
-            Cursor.Draw();
-            Window.Flip();
-
-            S.STARTtime = PTB_ENGINE.START(S.cfgKeybinds.Start, S.cfgKeybinds.Abort, Cursor);
+            S.STARTtime = PTB_ENGINE.START(S.cfgKeybinds.Start, S.cfgKeybinds.Abort, Cursor, Curve);
             S.recEvent.AddStart();
             S.Window.AddFrameToMovie();
 

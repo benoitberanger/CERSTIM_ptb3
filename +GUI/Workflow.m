@@ -44,6 +44,18 @@ S.guiTransparent = GUI.GET.Transparent( handles );
 S.guiRecordMovie = GUI.GET.RecordMovie( handles );
 S.guiEyelink     = GUI.GET.Eyelink    ( handles );
 S.guiTask        = GUI.GET.Task       ( hObject );
+S.guiInputMethod = GUI.GET.InputMethod( handles );
+
+
+%% Input method
+
+logger.log('Selected input method : %s', S.guiInputMethod)
+if strcmp(S.guiInputMethod, 'HandGrip')
+    logger.err('NOT CODED YET')
+    return
+else
+    % pass
+end
 
 
 %% Some warnings, and other stuff
