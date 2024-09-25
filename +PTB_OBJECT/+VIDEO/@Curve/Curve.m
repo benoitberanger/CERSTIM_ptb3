@@ -63,7 +63,6 @@ classdef Curve < PTB_OBJECT.VIDEO.Base
             x_to_render = x_to_render(2:end);
 
             Screen('DrawLines', self.window.ptr, [x_to_render;y_to_render], self.width_px, self.color);
-
         end % fcn
 
         %------------------------------------------------------------------

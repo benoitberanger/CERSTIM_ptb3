@@ -22,6 +22,8 @@ classdef RectCursor < PTB_OBJECT.VIDEO.Base
 
         center_y_lower_px (1,1) double % lower bound of center Y
         center_y_upper_px (1,1) double % upper bound of center Y
+
+        value             (1,1) double
     end % props
 
     methods(Access = public)
@@ -54,10 +56,10 @@ classdef RectCursor < PTB_OBJECT.VIDEO.Base
                 case 'HandGrip'
                 case 'Mouse'
                     SetMouse(self.center_x_px,self.center_y_lower_px,self.window.ptr);
+                    self.UpdateY(0);
                 otherwise
                     error('input method ?')
             end
-            self.UpdateY(0);
         end % fcn
 
         %------------------------------------------------------------------
@@ -75,6 +77,7 @@ classdef RectCursor < PTB_OBJECT.VIDEO.Base
         function UpdateY(self,y)
             % y from 0 to 1
             % y: [0-1] -> f(y): [center_y_lower_px center_y_upper_px]
+            self.value = y;
             self.center_y_px = (self.center_y_upper_px - self.center_y_lower_px)*y + self.center_y_lower_px;
             self.rect = CenterRectOnPoint([0 0 self.dim_px self.width_px], self.center_x_px, self.center_y_px);
         end % fcn

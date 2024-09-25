@@ -17,7 +17,7 @@ classdef Double < UTILS.RECORDER.Base
                     self.header =  header;
                     self.n_col = length(header);
                 else
-                    error( 'Header should be a line cell of strings' )
+                    error( 'header should be a line cell of strings' )
                 end
 
                 % --- nline ---
@@ -37,7 +37,7 @@ classdef Double < UTILS.RECORDER.Base
         %------------------------------------------------------------------
         function Plot( self )
             % Check if not empty
-            self.IsEmptyProperty('data');
+            self.IsEmptyProp('data');
 
             % Figure
             figure('Name',[ inputname(1) ' : ' class(self) ], 'NumberTitle' ,'off')
@@ -61,7 +61,7 @@ classdef Double < UTILS.RECORDER.Base
         %------------------------------------------------------------------
         function PlotDiffTime( self )
             % Check if not empty
-            self.IsEmptyProperty('data');
+            self.IsEmptyProp('data');
 
             % Figure
             figure('Name',[ inputname(1) ' : ' class(self) ], 'NumberTitle' ,'off')
@@ -73,7 +73,7 @@ classdef Double < UTILS.RECORDER.Base
             lgd = legend( 'diff(time)' );
             set(lgd,'Interpreter','none','Location','Best')
 
-            xlabel(self.Header{1})
+            xlabel(self.header{1})
 
             UTILS.ScaleAxisLimits( gca , 1.1 )
         end % fcn

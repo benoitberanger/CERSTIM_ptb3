@@ -6,11 +6,7 @@ global S
 
 [S.recPlanning, S.cfgEvents] = TASK.CERSTIM.PrepareEvents(S.guiACQmode);
 
-
-%% create other recorders
-
-S.recEvent     = UTILS.RECORDER.Event(S.recPlanning);
-S.recBehaviour = UTILS.RECORDER.Cell({'trial#' 'condition#'}, S.cfgEvents.nTrial);
+S.recEvent = UTILS.RECORDER.Event(S.recPlanning);
 
 
 %% set keybinds
@@ -59,6 +55,11 @@ S.Window.is_windowed    = S.guiWindowed;
 S.Window.is_recorded    = S.guiRecordMovie;
 
 S.Window.Open();
+
+
+%% Prepare numerical recorder
+
+S.recSensor = UTILS.RECORDER.Double({'time', 'target', 'sensor'}, S.recPlanning.data{end, S.recPlanning.Get('onset')} * S.Window.fps * 1.2);
 
 
 %% Prepare buffer size
@@ -216,6 +217,8 @@ for evt = 1 : S.recPlanning.count
                 Cursor.Draw();
                 flip_onset = Window.Flip();
 
+                S.recSensor.AddLine([flip_onset-S.STARTtime, Curve.buffer(Cursor.center_x_px), Cursor.value]);
+
                 if first_frame_of_event
                     S.recEvent.AddStim(evt_name, flip_onset-S.STARTtime, [], S.recPlanning.data(evt,S.recPlanning.icol_data:end));
                     first_frame_of_event = false;
@@ -236,7 +239,7 @@ for evt = 1 : S.recPlanning.count
         S.recEvent.AddEnd(S.ENDtime - S.STARTtime);
         S.recEvent.ClearEmptyLines();
 
-        S.recBehaviour.ClearEmptyLines();
+        S.recSensor.ClearEmptyLines();
 
         if S.WriteFiles
             save([S.OutFilepath '__ABORT_at_runtime.mat'], 'S')
@@ -268,6 +271,8 @@ switch S.guiACQmode
         S.recKeylogger.GenerateMRITrigger(TR, n_volume, S.STARTtime)
 end
 S.recKeylogger.ScaleTime(S.STARTtime);
+S.recSensor.ClearEmptyLines();
+
 assignin('base', 'S', S)
 
 switch S.guiACQmode
