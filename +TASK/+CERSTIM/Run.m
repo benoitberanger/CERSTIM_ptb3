@@ -59,7 +59,7 @@ S.Window.Open();
 
 %% Prepare numerical recorder
 
-S.recSensor = UTILS.RECORDER.Double({'time', 'target', 'sensor'}, S.recPlanning.data{end, S.recPlanning.Get('onset')} * S.Window.fps * 1.2);
+S.recSensor = UTILS.RECORDER.Double({'time', 'target', 'sensor'}, round(.recPlanning.data{end, S.recPlanning.Get('onset')} * S.Window.fps * 1.2));
 
 
 %% Prepare buffer size
