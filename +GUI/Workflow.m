@@ -45,6 +45,9 @@ S.guiRecordMovie = GUI.GET.RecordMovie( handles );
 S.guiEyelink     = GUI.GET.Eyelink    ( handles );
 S.guiTask        = GUI.GET.Task       ( hObject );
 S.guiInputMethod = GUI.GET.InputMethod( handles );
+S.guiValueFmax   = GUI.GET.valueFmax  ( handles );
+S.guiPctFmax     = GUI.GET.pctFmax    ( handles );
+S.guiNewton      = GUI.GET.Newton     ( handles );
 
 
 %% Input method
@@ -56,6 +59,12 @@ if strcmp(S.guiInputMethod, 'HandGrip')
 else
     % pass
 end
+
+%% Hand grip
+
+logger.assert(~isnan(S.guiValueFmax), 'GUI::Empty:: Participant''s Fmax value (N)')
+logger.assert(~isnan(S.guiPctFmax  ), 'GUI::Empty:: Task % FmaxY'                  )
+logger.assert(~isnan(S.guiNewton   ), 'GUI::Empty:: Task Newton (N)'              )
 
 
 %% Some warnings, and other stuff

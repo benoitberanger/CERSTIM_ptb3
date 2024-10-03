@@ -1,8 +1,8 @@
-function [planning, cfgEvents] = PrepareEvents(ACQmode)
+function [planning, cfgEvents] = PrepareEvents(ACQmode, Task)
 
 if nargin < 1 % only to plot the paradigm when we execute the function outside of the main script
     ACQmode = 'Acquisition';
-    guiTask = 'Full';
+    Task = 'Full';
 end
 
 cfgEvents = struct; % This structure will contain task specific parameters
@@ -15,7 +15,20 @@ cfgEvents = struct; % This structure will contain task specific parameters
 %% CERSTIM
 
 cfgEvents.Condition          = {'pctFmax', 'Newton'};
-cfgEvents.nTrialPerCondition = 15;
+
+switch Task
+    case 'Full'
+        cfgEvents.nTrialPerCondition = 15;
+    case 'Training'
+        cfgEvents.nTrialPerCondition = 3;
+    otherwise
+        error('Task ?')
+end
+
+% Notes :
+% 10% Fmax -> 1
+% 5N
+% 5N < 10% Fmax
 
 
 %% Timings

@@ -4,7 +4,7 @@ global S
 
 %% prepare events, timings, randomization
 
-[S.recPlanning, S.cfgEvents] = TASK.CERSTIM.PrepareEvents(S.guiACQmode);
+[S.recPlanning, S.cfgEvents] = TASK.CERSTIM.PrepareEvents(S.guiACQmode, S.guiTask);
 
 S.recEvent = UTILS.RECORDER.Event(S.recPlanning);
 
@@ -28,7 +28,7 @@ S.recKeylogger.Start();
 
 %% set parameters for rendering objects
 
-S.cfgCursor.Size     = 0.03;              %  Size_px = ScreenY_px * Size
+S.cfgCursor.Size     = 0.05;              %  Size_px = ScreenY_px * Size
 S.cfgCursor.Width    = 0.30;              % Width_px =    Size_px * Width
 S.cfgCursor.Color    = [255 000 000 255]; % [R G B a], from 0 to 255
 S.cfgCursor.XCenter  = 0.25;              % Position_px = ScreenX_px * XCenter
@@ -121,12 +121,10 @@ Curve.SetRangeY(S.cfgCursor.YRange(2), S.cfgCursor.YRange(1));
 
 % initialize / pre-allocate some vars
 EXIT = false;
-time = GetSecs();
 icol_trial    = S.recPlanning.Get('trial'    );
 icol_stim     = S.recPlanning.Get('stim'     );
 icol_cond     = S.recPlanning.Get('condition');
 curve_counter = 1;
-first_frame_of_event = true;
 
 % main loop
 for evt = 1 : S.recPlanning.count
