@@ -174,25 +174,24 @@ end
 
 %% Save post-processing files
 
-if exist(fullfile('+TASK',['+' S.guiTask],'Generate_SPM_NamesOnsetsDurations_block.m'),'file')
-    [names, onsets, durations] = TASK.(S.guiTask).Generate_SPM_NamesOnsetsDurations_block();
+[names, onsets, durations] = TASK.CERSTIM.Generate_SPM_NamesOnsetsDurations_block();
 
-    if S.WriteFiles
-        fpath_spm_block = [S.OutFilepath '__SPM_block.mat'];
-        save(fpath_spm_block, 'names', 'onsets', 'durations'); % light weight file with only the onsets for SPM
-        logger.log('saved SPM `block` file : %s', fpath_spm_block)
-    end
+if S.WriteFiles
+    fpath_spm_block = [S.OutFilepath '__SPM_block.mat'];
+    save(fpath_spm_block, 'names', 'onsets', 'durations'); % light weight file with only the onsets for SPM
+    logger.log('saved SPM `block` file : %s', fpath_spm_block)
 end
 
-if exist(fullfile('+TASK',['+' S.guiTask],'Generate_SPM_NamesOnsetsDurations_parametric.m'),'file')
-    [names, onsets, durations, pmod, tmod, orth] = TASK.(S.guiTask).Generate_SPM_NamesOnsetsDurations_parametric();
 
-    if S.WriteFiles
-        fpath_spm_parametric = [S.OutFilepath '__SPM_parametric.mat'];
-        save(fpath_spm_parametric, 'names', 'onsets', 'durations', 'pmod', 'tmod', 'orth'); % light weight file with only the onsets for SPM
-        logger.log('saved SPM parametric file : %s', fpath_spm_parametric)
-    end
-end
+% if exist(fullfile('+TASK','+CERSTIM','Generate_SPM_NamesOnsetsDurations_parametric.m'),'file')
+%     [names, onsets, durations, pmod, tmod, orth] = TASK.CERSTIM.Generate_SPM_NamesOnsetsDurations_parametric();
+%
+%     if S.WriteFiles
+%         fpath_spm_parametric = [S.OutFilepath '__SPM_parametric.mat'];
+%         save(fpath_spm_parametric, 'names', 'onsets', 'durations', 'pmod', 'tmod', 'orth'); % light weight file with only the onsets for SPM
+%         logger.log('saved SPM parametric file : %s', fpath_spm_parametric)
+%     end
+% end
 
 
 %% Ready for another run
