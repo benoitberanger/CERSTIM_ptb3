@@ -6,7 +6,8 @@ global S
 
 [S.recPlanning, S.cfgEvents] = TASK.CERSTIM.PrepareEvents(S.guiACQmode, S.guiTask);
 
-S.recEvent = UTILS.RECORDER.Event(S.recPlanning);
+S.recEvent     = UTILS.RECORDER.Event(S.recPlanning);
+S.recBehaviour = UTILS.RECORDER.Cell([S.recPlanning.header_data {'recSensor_count'}], S.recPlanning.count);
 
 
 %% set keybinds
@@ -179,7 +180,7 @@ for evt = 1 : S.recPlanning.count
         case 'END'
 
             S.ENDtime = WaitSecs('UntilTime', S.STARTtime + evt_onset );
-            S.recEvent.AddEnd(S.ENDtime - S.STARTtime );
+            S.recEvent.AddEnd(S.ENDtime - S.STARTtime);
             S.Window.AddFrameToMovie();
             PTB_ENGINE.END();
 
@@ -203,13 +204,7 @@ for evt = 1 : S.recPlanning.count
             end
 
             while 1
-
-                [keyIsDown, time, keyCode] = KbCheck();
-                if keyIsDown
-                    EXIT = keyCode(S.cfgKeybinds.Abort);
-                    if EXIT, break, end
-                end
-
+                
                 if ~strcmp(S.guiACQmode,'Acquisition')
                     Screen('DrawText', S.Window.ptr, evt_name, 10, 10, Curve.color);
                 end
@@ -222,10 +217,16 @@ for evt = 1 : S.recPlanning.count
                 flip_onset = Window.Flip();
 
                 S.recSensor.AddLine([flip_onset-S.STARTtime, Curve.buffer(Cursor.center_x_px), Cursor.value]);
-
                 if first_frame_of_event
                     S.recEvent.AddStim(evt_name, flip_onset-S.STARTtime, [], S.recPlanning.data(evt,S.recPlanning.icol_data:end));
+                    S.recBehaviour.AddLine({S.recPlanning.data{evt,S.recPlanning.icol_data:end} S.recSensor.count});
                     first_frame_of_event = false;
+                end
+
+                [keyIsDown, time, keyCode] = KbCheck();
+                if keyIsDown
+                    EXIT = keyCode(S.cfgKeybinds.Abort);
+                    if EXIT, break, end
                 end
 
                 if time >= S.STARTtime + next_evt_onset - S.Window.slack
@@ -244,6 +245,7 @@ for evt = 1 : S.recPlanning.count
         S.recEvent.ClearEmptyLines();
 
         S.recSensor.ClearEmptyLines();
+        S.recBehaviour.ClearEmptyLines();
 
         if S.WriteFiles
             save([S.OutFilepath '__ABORT_at_runtime.mat'], 'S')
@@ -276,6 +278,7 @@ switch S.guiACQmode
 end
 S.recKeylogger.ScaleTime(S.STARTtime);
 S.recSensor.ClearEmptyLines();
+S.recBehaviour.ClearEmptyLines();
 
 assignin('base', 'S', S)
 
