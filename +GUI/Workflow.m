@@ -183,15 +183,18 @@ if S.WriteFiles
 end
 
 
-% if exist(fullfile('+TASK','+CERSTIM','Generate_SPM_NamesOnsetsDurations_parametric.m'),'file')
-%     [names, onsets, durations, pmod, tmod, orth] = TASK.CERSTIM.Generate_SPM_NamesOnsetsDurations_parametric();
-%
-%     if S.WriteFiles
-%         fpath_spm_parametric = [S.OutFilepath '__SPM_parametric.mat'];
-%         save(fpath_spm_parametric, 'names', 'onsets', 'durations', 'pmod', 'tmod', 'orth'); % light weight file with only the onsets for SPM
-%         logger.log('saved SPM parametric file : %s', fpath_spm_parametric)
-%     end
-% end
+[R_all, names_all] = TASK.CERSTIM.Generate_SPM_NamesOnsetsDurations_regressor();
+
+if S.WriteFiles
+    fpath_spm_regressor_base = [S.OutFilepath '__SPM_regressor'];
+    for idx = 1:length(names_all)
+        fpath_spm_regressor_current = [fpath_spm_regressor_base '__' names_all{idx} '.mat'];
+        R     = R_all    (:,idx);
+        names = names_all(  idx);
+        save(fpath_spm_regressor_current, 'R', 'names');
+        logger.log('saved SPM `regressor` file : %s', fpath_spm_regressor_current)
+    end
+end
 
 
 %% Ready for another run

@@ -204,7 +204,7 @@ for evt = 1 : S.recPlanning.count
             end
 
             while 1
-                
+
                 if ~strcmp(S.guiACQmode,'Acquisition')
                     Screen('DrawText', S.Window.ptr, evt_name, 10, 10, Curve.color);
                 end
