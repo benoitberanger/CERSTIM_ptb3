@@ -106,6 +106,12 @@ Cursor.color  = S.cfgCursor.Color;
 Cursor.SetCenterX(S.cfgCursor.XCenter);
 Cursor.SetRangeY(S.cfgCursor.YRange(2), S.cfgCursor.YRange(1));
 Cursor.input  = S.guiInputMethod;
+if strcmp(S.guiInputMethod, 'HandGrip')
+    Cursor.lj = S.LabJackU6;
+end
+Cursor.participant_fmax_newton = S.guiValueFmax;
+Cursor.task_pct_fmax           = S.guiPctFmax;
+Cursor.task_newton             = S.guiNewton;
 Cursor.Init();
 
 Curve                 = PTB_OBJECT.VIDEO.Curve();

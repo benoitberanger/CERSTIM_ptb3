@@ -54,8 +54,10 @@ S.guiNewton      = GUI.GET.Newton     ( handles );
 
 logger.log('Selected input method : %s', S.guiInputMethod)
 if strcmp(S.guiInputMethod, 'HandGrip')
-    logger.err('NOT CODED YET')
-    return
+    S.LabJackU6 = UTILS.LabJackU6();
+    S.LabJackU6.Open();
+    S.LabJackU6.Configure();
+    S.LabJackU6.GetValue();
 else
     % pass
 end

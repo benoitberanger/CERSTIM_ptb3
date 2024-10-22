@@ -6,6 +6,10 @@ classdef RectCursor < PTB_OBJECT.VIDEO.Base
         width    (1,1) double % ratio from self.dim, from 0 to 1
         color    (1,4) uint8  % [R G B a] from 0 to 255
         input    (1,:) char   % 'HandGrip' or 'Mouse'
+        lj             UTILS.LabJackU6
+        participant_fmax_newton (1,1) double
+        task_pct_fmax           (1,1) double
+        task_newton             (1,1) double
     end % props
 
 
@@ -54,6 +58,7 @@ classdef RectCursor < PTB_OBJECT.VIDEO.Base
         function Init(self)
             switch self.input
                 case 'HandGrip'
+                    self.Update();
                 case 'Mouse'
                     SetMouse(self.center_x_px,self.center_y_lower_px,self.window.ptr);
                     self.UpdateY(0);
@@ -66,6 +71,13 @@ classdef RectCursor < PTB_OBJECT.VIDEO.Base
         function Update(self)
             switch self.input
                 case 'HandGrip'
+                    adc_volt = self.lj.GetValue();
+                    volt_to_kgf = 1 / 0.1564;
+                    kgf_to_newton = 9.81;
+                    adc_newton = adc_volt         * volt_to_kgf * kgf_to_newton
+                    max_newton = self.lj.range(2) * volt_to_kgf * kgf_to_newton;
+                    max_newton = self.participant_fmax_newton * self.task_pct_fmax;
+                    pos = adc_newton / max_newton;
                 case 'Mouse'
                     [~,y] = GetMouse(self.window.ptr);
                     pos = (y - self.center_y_lower_px) / (self.center_y_upper_px - self.center_y_lower_px);
