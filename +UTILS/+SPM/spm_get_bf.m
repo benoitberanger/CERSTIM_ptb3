@@ -129,7 +129,7 @@ switch xBF.name
         
         %-Canonical hemodynamic response function
         %------------------------------------------------------------------
-        [bf, p]      = spm_hrf(dt,[],fMRI_T);
+        [bf, p]      = UTILS.SPM.spm_hrf(dt,[],fMRI_T);
         
         %-Add time derivative
         %------------------------------------------------------------------
@@ -137,7 +137,7 @@ switch xBF.name
             
             dp       = 1;
             p(6)     = p(6) + dp;
-            D        = (bf(:,1) - spm_hrf(dt,p,fMRI_T))/dp;
+            D        = (bf(:,1) - UTILS.SPM.spm_hrf(dt,p,fMRI_T))/dp;
             bf       = [bf D(:)];
             p(6)     = p(6) - dp;
             
@@ -147,7 +147,7 @@ switch xBF.name
                 
                 dp   = 0.01;
                 p(3) = p(3) + dp;
-                D    = (bf(:,1) - spm_hrf(dt,p,fMRI_T))/dp;
+                D    = (bf(:,1) - UTILS.SPM.spm_hrf(dt,p,fMRI_T))/dp;
                 bf   = [bf D(:)];
             end
         end
@@ -181,5 +181,5 @@ bf    = [];
 for i = 2:(1 + h)
         m   = 2^i;
         s   = sqrt(m);
-        bf  = [bf spm_Gpdf(u,(m/s)^2,m/s^2)];
+        bf  = [bf UTILS.SPM.spm_Gpdf(u,(m/s)^2,m/s^2)];
 end
