@@ -23,42 +23,7 @@ classdef LabJackU6 < handle
 
         %--- constructor --------------------------------------------------
         function self = LabJackU6(varargin)
-
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            DEBUG = false;
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-            if DEBUG
-                self.Open()
-                self.Configure()
-
-                fig = figure('Name', 'LabJackU6_AIN0', 'NumberTitle','off');
-                window_size = 2000;
-                time   = nan(1,window_size);
-                sensor = nan(1,window_size);
-                p = plot(time,sensor);
-
-                t0 = GetSecs();
-                fprintf('Press any key to stop \n')
-                while ~KbCheck()
-                    time   = circshift(time  , 1);
-                    sensor = circshift(sensor, 1);
-
-                    value = self.GetValue();
-                    onset = GetSecs() - t0;
-                    time(1) = onset;
-                    sensor(1) = value;
-
-                    set(p, 'XData', time, 'YData', sensor);
-                    ylim([-1 5]);
-                    fprintf('%g \n', value);
-
-                    drawnow();
-                end
-
-                close(fig)
-            end
-
+            % pass
         end % ctor
 
         %------------------------------------------------------------------
@@ -122,6 +87,42 @@ classdef LabJackU6 < handle
             [self.error, ioType, channel, dblValue] = self.udObj.GetFirstResult(self.handle, 0, 0, 0, 0, 0);
             self.value = dblValue;
             value = self.value;
+        end % fcn
+
+    end % meths
+
+    methods(Static)
+
+        function Test()
+            self = UTILS.LabJackU6();
+            self.Open()
+            self.Configure()
+
+            fig = figure('Name', 'LabJackU6_AIN0', 'NumberTitle','off');
+            window_size = 2000;
+            time   = nan(1,window_size);
+            sensor = nan(1,window_size);
+            p = plot(time,sensor);
+
+            t0 = GetSecs();
+            fprintf('Press any key to stop \n')
+            while ~KbCheck()
+                time   = circshift(time  , 1);
+                sensor = circshift(sensor, 1);
+
+                value = self.GetValue();
+                onset = GetSecs() - t0;
+                time(1) = onset;
+                sensor(1) = value;
+
+                set(p, 'XData', time, 'YData', sensor);
+                ylim([-1 5]);
+                fprintf('%g \n', value);
+
+                drawnow();
+            end
+
+            close(fig)
         end % fcn
 
     end % meths

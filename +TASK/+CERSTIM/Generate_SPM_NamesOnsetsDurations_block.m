@@ -18,6 +18,10 @@ names = {
 onsets    = cell(size(names));
 durations = cell(size(names));
 
+if S.recEvent.count == 0
+    return
+end
+
 name2idx = [];
 for n = 1 : length(names)
     name2idx.(names{n}) = n;

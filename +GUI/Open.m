@@ -178,16 +178,19 @@ where = handles.uipanel_input;
 handles.radiobutton_mode_grip  = uicontrol(where, base_cfg_radiobutton{:}, 'Position',[0.20 0.60 0.60 0.30], 'String','HandGrip', 'Tooltip','Using LabJack USB');
 handles.radiobutton_mode_mouse = uicontrol(where, base_cfg_radiobutton{:}, 'Position',[0.20 0.20 0.60 0.30], 'String','Mouse'   , 'Tooltip','Computer mouse'   );
 
+
 %% Panel : Hand grip
 
 where = handles.uipanel_handgrip;
 
-handles.edit_valueFmax = uicontrol(where, base_cfg_edit{:}, 'Position',[0.00 0.00 0.33 0.60], 'String', ''  );
-handles.edit_pctFmax   = uicontrol(where, base_cfg_edit{:}, 'Position',[0.33 0.00 0.33 0.60], 'String', '10');
-handles.edit_Newton    = uicontrol(where, base_cfg_edit{:}, 'Position',[0.66 0.00 0.33 0.60], 'String', '5' );
-handles.text_valueFmax = uicontrol(where, base_cfg_text{:}, 'Position',[0.00 0.60 0.33 0.30], 'String', 'Participant''s Fmax value (N)');
-handles.text_pctFmax   = uicontrol(where, base_cfg_text{:}, 'Position',[0.33 0.60 0.33 0.30], 'String', 'Task % of Fmax');
-handles.text_Newton    = uicontrol(where, base_cfg_text{:}, 'Position',[0.66 0.60 0.33 0.30], 'String', 'Task Newton (N)');
+handles.pushbutton_showgrip = uicontrol(where, base_cfg_pushbutton{:}, 'Position',[0.00 0.00 0.25 1.00], 'String','Show Grip', 'Callback',@GUI.VIEW.pushbutton_showgrip_Callback);
+
+handles.edit_valueFmax = uicontrol(where, base_cfg_edit{:}, 'Position',[0.25 0.00 0.25 0.60], 'String',''  );
+handles.edit_pctFmax   = uicontrol(where, base_cfg_edit{:}, 'Position',[0.50 0.00 0.25 0.60], 'String','10');
+handles.edit_Newton    = uicontrol(where, base_cfg_edit{:}, 'Position',[0.75 0.00 0.25 0.60], 'String','5' );
+handles.text_valueFmax = uicontrol(where, base_cfg_text{:}, 'Position',[0.25 0.60 0.25 0.30], 'String','Participant''s Fmax value (N)');
+handles.text_pctFmax   = uicontrol(where, base_cfg_text{:}, 'Position',[0.50 0.60 0.25 0.30], 'String','Task % of Fmax');
+handles.text_Newton    = uicontrol(where, base_cfg_text{:}, 'Position',[0.75 0.60 0.25 0.30], 'String','Task Newton (N)');
 
 
 %% Panel : Task

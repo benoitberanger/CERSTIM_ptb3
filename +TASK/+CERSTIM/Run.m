@@ -16,9 +16,9 @@ S.cfgKeybinds = TASK.cfgKeyboard(); % cross task keybinds
 
 switch S.guiKeybind
     case 'fORP (MRI)'
-        % S.cfgKeybinds.Catch = KbName('b');
+        S.cfgKeybinds.Calibrate = KbName('c');
     case 'Keyboard'
-        % S.cfgKeybinds.Catch = KbName('DownArrow');
+        S.cfgKeybinds.Calibrate = KbName('c');
     otherwise
         error('unknown S.guiKeybind : %s', S.guiKeybind)
 end
@@ -179,7 +179,80 @@ for evt = 1 : S.recPlanning.count
                 end
             end
 
-            S.STARTtime = PTB_ENGINE.START(S.cfgKeybinds.Start, S.cfgKeybinds.Abort, Cursor, Curve);
+            % Wait for start
+            switch S.guiACQmode
+
+                case 'Acquisition'
+
+                    if S.guiEyelink
+                        EYELINK.StartRecording();
+                    end
+
+                    HideCursor(S.guiScreenID);
+
+                    % print
+                    fprintf('----------------------------------\n')
+                    fprintf('      Press "%s" to calibrate    \n', KbName(S.cfgKeybinds.Calibrate))
+                    fprintf('----------------------------------\n')
+                    fprintf('----------------------------------\n')
+                    fprintf('      Waiting for trigger "%s"    \n', KbName(S.cfgKeybinds.Start))
+                    fprintf('                OR                \n')
+                    fprintf('       Press "%s" to abort        \n', KbName(S.cfgKeybinds.Abort))
+                    fprintf('----------------------------------\n')
+
+                    while 1
+
+                        [keyIsDown, secs, keyCode] = KbCheck();
+
+                        Cursor.Update();
+                        Curve.Draw();
+                        Cursor.Draw();
+                        Cursor.Flip();
+
+                        if ~keyIsDown
+                            continue
+                        end
+
+                        if keyCode(S.cfgKeybinds.Start)
+                            S.STARTtime = secs;
+                            fprintf(' ===> Start key received <=== \n')
+                            break
+                        end
+
+                        if keyCode(S.cfgKeybinds.Abort)
+                            S.STARTtime = secs;
+                            S.ENDtime = secs;
+
+                            % sca -- Execute Screen('CloseAll'); WRAPPER
+                            sca
+
+                            % Close all pahandle if audio is active
+                            [~,M,~] = inmem;
+                            if strcmp(M,'PsychPortAudio')
+                                PsychPortAudio('Close');
+                            end
+
+                            % dump global S in a .mat file, for diagnostic
+                            if S.WriteFiles
+                                fpath_abort = [S.OutFilepath '__ABORT_before_START.mat'];
+                                save(fpath_abort, 'S')
+                                fprintf('saved abort before start file : %s\n', fpath_abort)
+                            end
+                            error('!!! @%s : Abort key received !!!', mfilename)
+                        end
+
+                        if keyCode(S.cfgKeybinds.Calibrate) && strcmp(S.guiInputMethod, 'HandGrip')
+                            Cursor.CalibrateOffset();
+                        end
+
+                    end
+
+                otherwise
+                    fprintf('START event in debug mod \n')
+                    S.STARTtime = GetSecs();
+
+            end % switch
+
             S.recEvent.AddStart();
             S.Window.AddFrameToMovie();
 

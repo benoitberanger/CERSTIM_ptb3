@@ -10,6 +10,7 @@ classdef RectCursor < PTB_OBJECT.VIDEO.Base
         participant_fmax_newton (1,1) double
         task_pct_fmax           (1,1) double
         task_newton             (1,1) double
+        adc_offset              (1,1) double
     end % props
 
 
@@ -22,7 +23,6 @@ classdef RectCursor < PTB_OBJECT.VIDEO.Base
         rect              (1,4) double % coordinates of the cross for PTB, in pixels
 
         center_x          (1,1) double % ratio from window_size_x, from 0 to 1
-        % center_y          (1,1) double % ratio from window_size_y, from 0 to 1
 
         center_y_lower_px (1,1) double % lower bound of center Y
         center_y_upper_px (1,1) double % upper bound of center Y
@@ -55,9 +55,26 @@ classdef RectCursor < PTB_OBJECT.VIDEO.Base
         end % fcn
 
         %------------------------------------------------------------------
+        function CalibrateOffset(self)
+            nSample = 200;
+            fprintf('Averaging %d samples to get ADC offset... \n', nSample)
+            vect = nan(1,nSample);
+            for n = 1 : nSample
+                vect(n) = self.lj.GetValue();
+            end
+            MEAN   = mean  (vect);
+            MEDIAN = median(vect);
+            STD    = std   (vect);
+            fprintf('in Volt : MEAN=%g  MEADIAN=%g  STD=%g  \n', MEAN, MEDIAN, STD);
+            self.adc_offset = MEDIAN;
+            fprintf('Offset(V) = %g \n', self.adc_offset)
+        end % fcn
+
+        %------------------------------------------------------------------
         function Init(self)
             switch self.input
                 case 'HandGrip'
+                    self.CalibrateOffset();
                     self.Update();
                 case 'Mouse'
                     SetMouse(self.center_x_px,self.center_y_lower_px,self.window.ptr);
@@ -72,11 +89,12 @@ classdef RectCursor < PTB_OBJECT.VIDEO.Base
             switch self.input
                 case 'HandGrip'
                     adc_volt = self.lj.GetValue();
+                    adc_corrected = adc_volt - self.adc_offset;
                     volt_to_kgf = 1 / 0.1564;
                     kgf_to_newton = 9.81;
-                    adc_newton = adc_volt         * volt_to_kgf * kgf_to_newton
-                    max_newton = self.lj.range(2) * volt_to_kgf * kgf_to_newton;
-                    max_newton = self.participant_fmax_newton * self.task_pct_fmax;
+                    adc_newton = adc_corrected         * volt_to_kgf * kgf_to_newton;
+                    % max_newton = self.lj.range(2) * volt_to_kgf * kgf_to_newton;
+                    max_newton = self.participant_fmax_newton * self.task_pct_fmax/100;
                     pos = adc_newton / max_newton;
                 case 'Mouse'
                     [~,y] = GetMouse(self.window.ptr);
