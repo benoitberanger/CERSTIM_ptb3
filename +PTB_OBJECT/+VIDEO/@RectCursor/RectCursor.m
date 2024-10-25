@@ -27,7 +27,9 @@ classdef RectCursor < PTB_OBJECT.VIDEO.Base
         center_y_lower_px (1,1) double % lower bound of center Y
         center_y_upper_px (1,1) double % upper bound of center Y
 
-        value             (1,1) double
+        adc_raw           (1,1) double % Volt
+        adc_newton        (1,1) double % Newton
+        value             (1,1) double % normalized range [0,1]
     end % props
 
     methods(Access = public)
@@ -89,13 +91,14 @@ classdef RectCursor < PTB_OBJECT.VIDEO.Base
             switch self.input
                 case 'HandGrip'
                     adc_volt = self.lj.GetValue();
+                    self.adc_raw = adc_volt;
                     adc_corrected = adc_volt - self.adc_offset;
                     volt_to_kgf = 1 / 0.1564;
                     kgf_to_newton = 9.81;
-                    adc_newton = adc_corrected         * volt_to_kgf * kgf_to_newton;
-                    % max_newton = self.lj.range(2) * volt_to_kgf * kgf_to_newton;
+                    self.adc_newton = adc_corrected * volt_to_kgf * kgf_to_newton;
+                    % max_newton = self.task_newton;
                     max_newton = self.participant_fmax_newton * self.task_pct_fmax/100;
-                    pos = adc_newton / max_newton;
+                    pos = self.adc_newton / max_newton;
                 case 'Mouse'
                     [~,y] = GetMouse(self.window.ptr);
                     pos = (y - self.center_y_lower_px) / (self.center_y_upper_px - self.center_y_lower_px);

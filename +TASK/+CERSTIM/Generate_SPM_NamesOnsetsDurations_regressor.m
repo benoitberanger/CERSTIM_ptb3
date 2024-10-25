@@ -4,7 +4,7 @@ global S
 %% Prepare input
 
 target = S.recSensor.data(:,S.recSensor.Get('target'));
-sensor = S.recSensor.data(:,S.recSensor.Get('sensor'));
+sensor = S.recSensor.data(:,S.recSensor.Get('sensor_value'));
 err    = sqrt( abs((target-sensor)).^2 );
 
 U(1).u    = target;

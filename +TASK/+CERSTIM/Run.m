@@ -60,7 +60,7 @@ S.Window.Open();
 
 %% Prepare numerical recorder
 
-S.recSensor = UTILS.RECORDER.Double({'time', 'target', 'sensor'}, round(S.recPlanning.data{end, S.recPlanning.Get('onset')} * S.Window.fps * 1.2));
+S.recSensor = UTILS.RECORDER.Double({'time', 'target', 'sensor_raw', 'sensor_newton', 'sensor_value'}, round(S.recPlanning.data{end, S.recPlanning.Get('onset')} * S.Window.fps * 1.2));
 
 
 %% Prepare buffer size
@@ -81,18 +81,28 @@ initial_duration_to_fill = (n_window - 1)*(max_dur_one_trial+S.cfgEvents.durRest
 % they will be added in the buffer
 
 px_per_second = S.Window.size_x / S.cfgEvents.durWindow;
+newton_scaling_factor = S.guiNewton / S.guiValueFmax * S.guiPctFmax;
+
 
 flattop_px = S.cfgEvents.durFlatTop * px_per_second;
 rest_px    = S.cfgEvents.durRest    * px_per_second;
-flattop_points = ones(1,flattop_px);
-rest_points    = zeros(1,rest_px);
+flattop_pctfmax_points = ones(1,flattop_px);
+flattop_newton_points  = ones(1,flattop_px) * newton_scaling_factor;
+rest_points            = zeros(1,rest_px);
 
 curves = cell(S.cfgEvents.nTrial,1);
 for c = 1 : S.cfgEvents.nTrial
     rampup_dur    = S.cfgEvents.Trials(c,2);
     rampup_px     = rampup_dur * px_per_second;
-    rampup_points = linspace(0, 1, rampup_px);
-    curves{c}     = rampup_points;
+    switch S.cfgEvents.Trials(c,1)
+        case 1
+            rampup_points = linspace(0,                     1, rampup_px);
+        case 2
+            rampup_points = linspace(0, newton_scaling_factor, rampup_px);
+        otherwise
+            error('bad event')
+    end
+    curves{c} = rampup_points;
 end
 
 
@@ -159,6 +169,7 @@ for evt = 1 : S.recPlanning.count
             for i = 1 : init_event_maxidx_to_fill
                 init_evt_idx = 1 + i; % +1 because START must be skipped
                 init_evt_stim = S.recPlanning.data{init_evt_idx,icol_stim};
+                init_evt_cond = S.recPlanning.data{init_evt_idx,icol_cond};
 
                 if init_evt_idx == 2 && ~strcmp(init_evt_stim, 'Rest')
                     error('second event must be Rest')
@@ -170,7 +181,13 @@ for evt = 1 : S.recPlanning.count
                 elseif strcmp(init_evt_stim, 'Rest')
                     Curve.Append(rest_points);
                 elseif strcmp(init_evt_stim, 'FlatTop')
-                    Curve.Append(flattop_points);
+                    if     strcmp(init_evt_cond, 'pctFmax')
+                        Curve.Append(flattop_pctfmax_points);
+                    elseif strcmp(init_evt_cond, 'Newton')
+                        Curve.Append(flattop_newton_points);
+                    else
+                        error('bad event')
+                    end
                 elseif strcmp(init_evt_stim, 'RampUp')
                     Curve.Append(curves{curve_counter});
                     curve_counter = curve_counter + 1;
@@ -270,10 +287,17 @@ for evt = 1 : S.recPlanning.count
             init_evt_idx = init_evt_idx + 1;
             if init_evt_idx < S.recPlanning.count
                 buffer_evt_stim = S.recPlanning.data{init_evt_idx,icol_stim};
+                buffer_evt_cond = S.recPlanning.data{init_evt_idx,icol_cond};
                 if     strcmp(buffer_evt_stim, 'Rest')
                     Curve.Append(rest_points);
                 elseif strcmp(buffer_evt_stim, 'FlatTop')
-                    Curve.Append(flattop_points);
+                    if     strcmp(buffer_evt_cond, 'pctFmax')
+                        Curve.Append(flattop_pctfmax_points);
+                    elseif strcmp(buffer_evt_cond, 'Newton')
+                        Curve.Append(flattop_newton_points);
+                    else
+                        error('bad event')
+                    end
                 elseif strcmp(buffer_evt_stim, 'RampUp')
                     Curve.Append(curves{curve_counter});
                     curve_counter = curve_counter + 1;
@@ -295,7 +319,7 @@ for evt = 1 : S.recPlanning.count
                 Cursor.Draw();
                 flip_onset = Window.Flip();
 
-                S.recSensor.AddLine([flip_onset-S.STARTtime, Curve.buffer(Cursor.center_x_px), Cursor.value]);
+                S.recSensor.AddLine([flip_onset-S.STARTtime, Curve.buffer(Cursor.center_x_px), Cursor.adc_raw, Cursor.adc_newton, Cursor.value]);
                 if first_frame_of_event
                     S.recEvent.AddStim(evt_name, flip_onset-S.STARTtime, [], S.recPlanning.data(evt,S.recPlanning.icol_data:end));
                     S.recBehaviour.AddLine({S.recPlanning.data{evt,S.recPlanning.icol_data:end} S.recSensor.count});
