@@ -220,6 +220,16 @@ guidata(figHandle,handles)
 
 handles = guidata(figHandle);
 
+% disable parallel port
+handles.uipanel_parport.SelectedObject = handles.radiobutton_pp_no;
+handles.radiobutton_pp_yes.Visible = 'off';
+
+% disable eyelink menu
+handles.uipanel_eyelink.SelectedObject = handles.radiobutton_eyelink_no;
+handles.radiobutton_eyelink_yes.Visible = 'off';
+eventdata.NewValue.String = 'No';
+GUI.VIEW.uipanel_eyelink_SelectionChangedFcn(handles.uipanel_eyelink, eventdata)
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% DEBUG %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if debug
     assignin('base','handles',handles) %#ok<UNRCH>
